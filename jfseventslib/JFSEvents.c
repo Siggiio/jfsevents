@@ -200,6 +200,7 @@ JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
         if (handle->stopped) {
             if (handle->reading) {
                 shouldFree = true;
+                pthread_mutex_unlock(&(handle->lock));
                 break;
             }
         }
