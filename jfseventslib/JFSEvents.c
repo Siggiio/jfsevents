@@ -194,7 +194,6 @@ JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
     long endTime = startTime + (timeout);
     bool shouldFree = false;
     struct EventItem* item = NULL;
-    bool escapeLoop = false;
     do {
         pthread_mutex_lock(&(handle->lock));
         if (handle->stopped) {
@@ -212,14 +211,15 @@ JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
             (*env)->CallStaticVoidMethod(env, jfsEventsClass, checkForInterruptionMethod);
             if ((*env)->ExceptionCheck(env) || (timeout >= 0L && hasTimeExpired(startTime, endTime, monotonicTime()))) {
                 handle->reading = false;
-                escapeLoop = true;
+                pthread_mutex_unlock(&(handle->lock));
+                break;
             }
         }
         pthread_mutex_unlock(&(handle->lock));
         if (item == NULL) {
             usleep(1000);
         }
-    } while (item == NULL && !escapeLoop);
+    } while (item == NULL);
     if (shouldFree) {
         freeHandle(handle);
     }
