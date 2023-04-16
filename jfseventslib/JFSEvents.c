@@ -17,6 +17,7 @@ static JavaVM *jvm;
 
 static jclass jfsEventsClass;
 static jmethodID checkForInterruptionMethod;
+static jfieldID handleField;
 
 static jclass eventClass;
 static jfieldID idField;
@@ -133,6 +134,7 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_deallocate
         CFRelease(str);
     }
     CFRelease(handle->monitored_paths);
+    (*env)->SetLongField(env, handle->javaObject, handleField, 0);
     (*env)->DeleteGlobalRef(env, handle->javaObject);
     bool canFree = !handle->reading;
     pthread_mutex_unlock(&(handle->lock));
@@ -286,6 +288,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     jfsEventsClass = (*env)->NewGlobalRef(env, localJFSEventsClass);
     (*env)->DeleteLocalRef(env, localJFSEventsClass);
     checkForInterruptionMethod = (*env)->GetStaticMethodID(env, jfsEventsClass, "checkForInterruption", "()V");
+    handleField = (*env)->GetFieldID(env, jfsEventsClass, "handle", "J");
 
     jclass localEventClass = (*env)->FindClass(env, "io/siggi/jfsevents/FSEvent");
     eventClass = (*env)->NewGlobalRef(env, localEventClass);
