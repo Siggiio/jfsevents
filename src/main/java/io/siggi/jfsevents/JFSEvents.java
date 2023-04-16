@@ -71,9 +71,9 @@ public class JFSEvents implements Closeable {
 
     private static native void deallocate(long handle);
 
-    private static native boolean addPath(long handle, String path);
+    private static native void addPath(long handle, String path);
 
-    private static native boolean start(long handle, long device, long sinceEvent, double latency, int flags);
+    private static native void start(long handle, long device, long sinceEvent, double latency, int flags);
 
     private static native FSEvent readEvent(long handle, long timeout) throws InterruptedException;
 

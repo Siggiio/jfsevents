@@ -143,18 +143,23 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_deallocate
     }
 }
 
-JNIEXPORT jboolean JNICALL Java_io_siggi_jfsevents_JFSEvents_addPath
+JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_addPath
   (JNIEnv *env, jclass clazz, jlong longHandle, jstring path) {
     struct JFSEventsHandle* handle = (struct JFSEventsHandle*) longHandle;
-    if (handle->started) return false;
+    if (handle->started) {
+        (*env)->ThrowNew(env, illegalStateExceptionClass, "JFSEvents already started");
+        return;
+    }
     CFArrayAppendValue(handle->monitored_paths, to_cfstring(env, path));
-    return true;
 }
 
-JNIEXPORT jboolean JNICALL Java_io_siggi_jfsevents_JFSEvents_start
+JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_start
   (JNIEnv *env, jclass clazz, jlong longHandle, jlong device, jlong sinceEvent, jdouble latency, jint flags) {
     struct JFSEventsHandle* handle = (struct JFSEventsHandle*) longHandle;
-    if (handle->started) return false;
+    if (handle->started) {
+        (*env)->ThrowNew(env, illegalStateExceptionClass, "JFSEvents already started");
+        return;
+    }
     handle->started = true;
     FSEventStreamEventId sinceEventId;
     if (sinceEvent == -1L) {
@@ -187,13 +192,15 @@ JNIEXPORT jboolean JNICALL Java_io_siggi_jfsevents_JFSEvents_start
     }
     FSEventStreamSetDispatchQueue(handle->stream, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
     FSEventStreamStart(handle->stream);
-    return true;
 }
 
 JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
   (JNIEnv *env, jclass clazz, jlong longHandle, jlong timeout) {
     struct JFSEventsHandle* handle = (struct JFSEventsHandle*) longHandle;
-    if (!handle->started) return NULL;
+    if (!handle->started) {
+        (*env)->ThrowNew(env, illegalStateExceptionClass, "JFSEvents was not started yet.");
+        return NULL;
+    }
     long startTime = monotonicTime();
     long endTime = startTime + (timeout);
     bool didSetReading = false;

@@ -26,17 +26,17 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_deallocate
 /*
  * Class:     io_siggi_jfsevents_JFSEvents
  * Method:    addPath
- * Signature: (JLjava/lang/String;)Z
+ * Signature: (JLjava/lang/String;)V
  */
-JNIEXPORT jboolean JNICALL Java_io_siggi_jfsevents_JFSEvents_addPath
+JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_addPath
   (JNIEnv *, jclass, jlong, jstring);
 
 /*
  * Class:     io_siggi_jfsevents_JFSEvents
  * Method:    start
- * Signature: (JJJDI)Z
+ * Signature: (JJJDI)V
  */
-JNIEXPORT jboolean JNICALL Java_io_siggi_jfsevents_JFSEvents_start
+JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_start
   (JNIEnv *, jclass, jlong, jlong, jlong, jdouble, jint);
 
 /*
