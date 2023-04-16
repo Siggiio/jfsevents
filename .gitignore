@@ -1,0 +1,6 @@
+.DS_Store
+/target
+/src/main/resources/libjfseventslib.dylib
+.idea
+project.xcworkspace
+xcuserdata
