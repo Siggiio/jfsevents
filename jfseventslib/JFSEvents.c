@@ -26,6 +26,8 @@ static jfieldID flagsField;
 static jclass uuidClass;
 static jmethodID uuidConstructor;
 
+static jclass illegalStateExceptionClass;
+
 CFStringRef to_cfstring(JNIEnv *env, jstring path) {
     const char *cpath = (*env)->GetStringUTFChars(env, path, NULL);
     CFStringRef stringRef = CFStringCreateWithCString(kCFAllocatorDefault, cpath, kCFStringEncodingUTF8);
@@ -192,6 +194,7 @@ JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
     if (!handle->started) return NULL;
     long startTime = monotonicTime();
     long endTime = startTime + (timeout);
+    bool didSetReading = false;
     bool shouldFree = false;
     struct EventItem* item = NULL;
     do {
@@ -203,7 +206,15 @@ JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
                 break;
             }
         }
-        handle->reading = true;
+        if (!didSetReading) {
+            didSetReading = true;
+            if (handle->reading) {
+                (*env)->ThrowNew(env, illegalStateExceptionClass, "Simultaneous read on JFSEvents is not allowed.");
+                pthread_mutex_unlock(&(handle->lock));
+                break;
+            }
+            handle->reading = true;
+        }
         item = readEventItem(handle);
         if (item != NULL) {
             handle->reading = false;
@@ -288,6 +299,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     (*env)->DeleteLocalRef(env, localUuidClass);
     uuidConstructor = (*env)->GetMethodID(env, uuidClass, "<init>", "(JJ)V");
 
+    jclass localIllegalStateExceptionClass = (*env)->FindClass(env, "java/lang/IllegalStateException");
+    illegalStateExceptionClass = (*env)->NewGlobalRef(env, localIllegalStateExceptionClass);
+    (*env)->DeleteLocalRef(env, localIllegalStateExceptionClass);
+
     return JNI_VERSION_1_8;
 }
 
@@ -297,6 +312,7 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     (*env)->DeleteGlobalRef(env, jfsEventsClass);
     (*env)->DeleteGlobalRef(env, eventClass);
     (*env)->DeleteGlobalRef(env, uuidClass);
+    (*env)->DeleteGlobalRef(env, illegalStateExceptionClass);
 }
 
 
