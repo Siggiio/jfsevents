@@ -49,6 +49,11 @@ public class JFSEvents implements Closeable {
         addPath(handle, path);
     }
 
+    public void excludePath(String path) {
+        if (closed) throw new IllegalStateException("JFSEvents already closed");
+        excludePath(handle, path);
+    }
+
     public void start(long sinceEvent, double latency, int flags) {
         start(0L, sinceEvent, latency, flags);
     }
@@ -72,6 +77,8 @@ public class JFSEvents implements Closeable {
     private static native void deallocate(long handle);
 
     private static native void addPath(long handle, String path);
+
+    private static native void excludePath(long handle, String path);
 
     private static native void start(long handle, long device, long sinceEvent, double latency, int flags);
 

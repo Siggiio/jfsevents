@@ -116,6 +116,7 @@ JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_allocate
     handle->javaObject = (*env)->NewGlobalRef(env, javaObject);
     handle->started = false;
     handle->monitoredPaths = CFArrayCreateMutable(NULL, 0, NULL);
+    handle->excludedPaths = CFArrayCreateMutable(NULL, 0, NULL);
     return (long) handle;
 }
 
@@ -134,6 +135,11 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_deallocate
         CFRelease(str);
     }
     CFRelease(handle->monitoredPaths);
+    for (int i = 0; i < CFArrayGetCount(handle->excludedPaths); i++) {
+        CFStringRef str = CFArrayGetValueAtIndex(handle->excludedPaths, i);
+        CFRelease(str);
+    }
+    CFRelease(handle->excludedPaths);
     (*env)->SetLongField(env, handle->javaObject, handleField, 0);
     (*env)->DeleteGlobalRef(env, handle->javaObject);
     bool canFree = !handle->reading;
@@ -151,6 +157,16 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_addPath
         return;
     }
     CFArrayAppendValue(handle->monitoredPaths, to_cfstring(env, path));
+}
+
+JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_excludePath
+  (JNIEnv *env, jclass clazz, jlong longHandle, jstring path) {
+    struct JFSEventsHandle* handle = (struct JFSEventsHandle*) longHandle;
+    if (handle->started) {
+        (*env)->ThrowNew(env, illegalStateExceptionClass, "JFSEvents already started");
+        return;
+    }
+    CFArrayAppendValue(handle->excludedPaths, to_cfstring(env, path));
 }
 
 JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_start
@@ -189,6 +205,9 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_start
                                                              latency,
                                                              flags
                                                              );
+    }
+    if (CFArrayGetCount(handle->excludedPaths) > 0) {
+        FSEventStreamSetExclusionPaths(handle->stream, handle->excludedPaths);
     }
     FSEventStreamSetDispatchQueue(handle->stream, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
     FSEventStreamStart(handle->stream);

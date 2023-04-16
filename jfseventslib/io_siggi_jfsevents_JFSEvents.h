@@ -33,6 +33,14 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_addPath
 
 /*
  * Class:     io_siggi_jfsevents_JFSEvents
+ * Method:    excludePath
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_excludePath
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     io_siggi_jfsevents_JFSEvents
  * Method:    start
  * Signature: (JJJDI)V
  */
