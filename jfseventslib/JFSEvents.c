@@ -115,7 +115,7 @@ JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_allocate
     pthread_mutex_init(&(handle->lock), NULL);
     handle->javaObject = (*env)->NewGlobalRef(env, javaObject);
     handle->started = false;
-    handle->monitored_paths = CFArrayCreateMutable(NULL, 0, NULL);
+    handle->monitoredPaths = CFArrayCreateMutable(NULL, 0, NULL);
     return (long) handle;
 }
 
@@ -129,11 +129,11 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_deallocate
         FSEventStreamRelease(handle->stream);
         handle->stopped = true;
     }
-    for (int i = 0; i < CFArrayGetCount(handle->monitored_paths); i++) {
-        CFStringRef str = CFArrayGetValueAtIndex(handle->monitored_paths, i);
+    for (int i = 0; i < CFArrayGetCount(handle->monitoredPaths); i++) {
+        CFStringRef str = CFArrayGetValueAtIndex(handle->monitoredPaths, i);
         CFRelease(str);
     }
-    CFRelease(handle->monitored_paths);
+    CFRelease(handle->monitoredPaths);
     (*env)->SetLongField(env, handle->javaObject, handleField, 0);
     (*env)->DeleteGlobalRef(env, handle->javaObject);
     bool canFree = !handle->reading;
@@ -150,7 +150,7 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_addPath
         (*env)->ThrowNew(env, illegalStateExceptionClass, "JFSEvents already started");
         return;
     }
-    CFArrayAppendValue(handle->monitored_paths, to_cfstring(env, path));
+    CFArrayAppendValue(handle->monitoredPaths, to_cfstring(env, path));
 }
 
 JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_start
@@ -174,7 +174,7 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_start
         handle->stream = FSEventStreamCreate(NULL,
                                              &fs_callback,
                                              &streamContext,
-                                             handle->monitored_paths,
+                                             handle->monitoredPaths,
                                              sinceEventId,
                                              latency,
                                              flags
@@ -184,7 +184,7 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_start
                                                              &fs_callback,
                                                              &streamContext,
                                                              (dev_t) device,
-                                                             handle->monitored_paths,
+                                                             handle->monitoredPaths,
                                                              sinceEventId,
                                                              latency,
                                                              flags

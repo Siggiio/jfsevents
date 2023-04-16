@@ -22,7 +22,7 @@ struct JFSEventsHandle {
     jobject javaObject;
     volatile bool started;
     volatile bool stopped;
-    CFMutableArrayRef monitored_paths;
+    CFMutableArrayRef monitoredPaths;
     FSEventStreamRef stream;
     pthread_mutex_t lock;
     bool reading;
