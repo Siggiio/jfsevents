@@ -45,14 +45,16 @@ public class JFSEvents implements Closeable {
     }
 
     public void addPath(String path) {
+        if (closed) throw new IllegalStateException("JFSEvents already closed");
         addPath(handle, path);
     }
 
     public void start(long sinceEvent, double latency, int flags) {
-        start(handle, 0L, sinceEvent, latency, flags);
+        start(0L, sinceEvent, latency, flags);
     }
 
     public void start(long device, long sinceEvent, double latency, int flags) {
+        if (closed) throw new IllegalStateException("JFSEvents already closed");
         start(handle, device, sinceEvent, latency, flags);
     }
 
