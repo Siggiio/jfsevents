@@ -286,6 +286,26 @@ JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
     return event;
 }
 
+JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_getLatestEventId
+  (JNIEnv *env, jclass clazz, jlong longHandle) {
+    struct JFSEventsHandle* handle = (struct JFSEventsHandle*) longHandle;
+    if (!handle->started) {
+        (*env)->ThrowNew(env, illegalStateExceptionClass, "JFSEvents was not started yet.");
+        return 0;
+    }
+    return FSEventStreamGetLatestEventId(handle->stream);
+}
+
+JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_getCurrentEventId
+  (JNIEnv *env, jclass clazz) {
+    return FSEventsGetCurrentEventId();
+}
+
+JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_getLastEventIdForDeviceBeforeTime
+  (JNIEnv *env, jclass clazz, jlong device, jlong time) {
+    return FSEventsGetLastEventIdForDeviceBeforeTime((dev_t) device, time);
+}
+
 JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_getDeviceId
   (JNIEnv *env, jclass clazz, jstring javaPath) {
     const char *path = (*env)->GetStringUTFChars(env, javaPath, 0);

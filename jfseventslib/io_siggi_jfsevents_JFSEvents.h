@@ -57,6 +57,30 @@ JNIEXPORT jobject JNICALL Java_io_siggi_jfsevents_JFSEvents_readEvent
 
 /*
  * Class:     io_siggi_jfsevents_JFSEvents
+ * Method:    getLatestEventId
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_getLatestEventId
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     io_siggi_jfsevents_JFSEvents
+ * Method:    getCurrentEventId
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_getCurrentEventId
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     io_siggi_jfsevents_JFSEvents
+ * Method:    getLastEventIdForDeviceBeforeTime
+ * Signature: (JJ)J
+ */
+JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_getLastEventIdForDeviceBeforeTime
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     io_siggi_jfsevents_JFSEvents
  * Method:    getDeviceId
  * Signature: (Ljava/lang/String;)J
  */

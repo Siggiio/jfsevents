@@ -72,6 +72,11 @@ public class JFSEvents implements Closeable {
         return readEvent(handle, timeout);
     }
 
+    public long getLatestEventId() {
+        if (closed) throw new IllegalStateException("JFSEvents already closed");
+        return getLatestEventId(handle);
+    }
+
     private static native long allocate(JFSEvents javaObject);
 
     private static native void deallocate(long handle);
@@ -83,6 +88,12 @@ public class JFSEvents implements Closeable {
     private static native void start(long handle, long device, long sinceEvent, double latency, int flags);
 
     private static native FSEvent readEvent(long handle, long timeout) throws InterruptedException;
+
+    private static native long getLatestEventId(long handle);
+
+    public static native long getCurrentEventId();
+
+    public static native long getLastEventIdForDeviceBeforeTime(long device, long timeInSecondsSince1970);
 
     public static native long getDeviceId(String path);
 
