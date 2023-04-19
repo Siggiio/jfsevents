@@ -68,6 +68,7 @@ void createAndAppendEventItem(struct JFSEventsHandle* handle, long eventId, char
     char* copyOfPath = malloc(length + 1);
     strcpy(copyOfPath, path);
     struct EventItem* item = malloc(sizeof(struct EventItem));
+    item->nextItem = NULL;
     item->id = eventId;
     item->path = copyOfPath;
     item->flags = eventFlags;
@@ -115,8 +116,13 @@ JNIEXPORT jlong JNICALL Java_io_siggi_jfsevents_JFSEvents_allocate
     pthread_mutex_init(&(handle->lock), NULL);
     handle->javaObject = (*env)->NewGlobalRef(env, javaObject);
     handle->started = false;
+    handle->stopped = false;
     handle->monitoredPaths = CFArrayCreateMutable(NULL, 0, NULL);
     handle->excludedPaths = CFArrayCreateMutable(NULL, 0, NULL);
+    handle->stream = NULL;
+    handle->reading = false;
+    handle->firstItem = NULL;
+    handle->lastItem = NULL;
     return (long) handle;
 }
 
