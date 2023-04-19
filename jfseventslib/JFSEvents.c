@@ -89,11 +89,13 @@ void appendEventItem(struct JFSEventsHandle* handle, struct EventItem* item) {
 }
 
 void freeHandle(struct JFSEventsHandle* handle) {
+    pthread_mutex_lock(&(handle->lock));
     while (handle->firstItem != NULL) {
         struct EventItem* item = handle->firstItem;
         handle->firstItem = item->nextItem;
         free(item);
     }
+    pthread_mutex_unlock(&(handle->lock));
     pthread_mutex_destroy(&(handle->lock));
     free(handle);
 }
