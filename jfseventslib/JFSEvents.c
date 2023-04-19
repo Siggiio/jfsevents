@@ -93,6 +93,7 @@ void freeHandle(struct JFSEventsHandle* handle) {
     while (handle->firstItem != NULL) {
         struct EventItem* item = handle->firstItem;
         handle->firstItem = item->nextItem;
+        free(item->path);
         free(item);
     }
     pthread_mutex_unlock(&(handle->lock));
