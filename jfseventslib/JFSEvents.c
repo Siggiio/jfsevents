@@ -132,11 +132,11 @@ JNIEXPORT void JNICALL Java_io_siggi_jfsevents_JFSEvents_deallocate
   (JNIEnv *env, jclass clazz, jlong longHandle) {
     struct JFSEventsHandle* handle = (struct JFSEventsHandle*) longHandle;
     pthread_mutex_lock(&(handle->lock));
+    handle->stopped = true;
     if (handle->started) {
         FSEventStreamStop(handle->stream);
         FSEventStreamInvalidate(handle->stream);
         FSEventStreamRelease(handle->stream);
-        handle->stopped = true;
     }
     for (int i = 0; i < CFArrayGetCount(handle->monitoredPaths); i++) {
         CFStringRef str = CFArrayGetValueAtIndex(handle->monitoredPaths, i);
