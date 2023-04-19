@@ -45,8 +45,10 @@ void fs_callback(ConstFSEventStreamRef streamRef,
     struct JFSEventsHandle* handle = (struct JFSEventsHandle*) callbackRef;
     char **paths = eventPaths;
     pthread_mutex_lock(&(handle->lock));
-    for (int i = 0; i < numEvents; i++) {
-        createAndAppendEventItem(handle, eventIds[i], paths[i], eventFlags[i]);
+    if (!handle->stopped) {
+        for (int i = 0; i < numEvents; i++) {
+            createAndAppendEventItem(handle, eventIds[i], paths[i], eventFlags[i]);
+        }
     }
     pthread_mutex_unlock(&(handle->lock));
 }
